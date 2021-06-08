@@ -30,5 +30,7 @@ album_artists = [artist['name'] for artist in album['artists']]
 album_released = album['release_date']
 album_uri = results['albums']['items'][choice-1]['href']
 
+print(album)
+
 # create a notion page w proper information
 notion_helpers.create_page(album_name, album_artists, album_released)

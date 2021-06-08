@@ -38,7 +38,7 @@ def create_page(album_name: str, artists: list, released: str):
             "Released": {
                 "type": "date",
                 "date": {
-                    "start": datetime.strptime(released, '%Y-%m-%d').isoformat()
+                    "start": released
                 }
             }
         }
