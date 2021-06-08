@@ -10,7 +10,7 @@ NOTION_TOKEN = os.getenv('NOTION_TOKEN')
 NOTION_DATABASE = os.getenv('NOTION_DATABASE')
 
 # create requests important info
-url = 'https://api.notion.com/v1/pages'
+pages_url = 'https://api.notion.com/v1/pages'
 req_headers = {
     'Authorization': 'Bearer {}'.format(NOTION_TOKEN),
     'Content-Type': 'application/json',
@@ -20,7 +20,7 @@ req_headers = {
 # creates a page in the database with the given arguments
 
 
-def create_page(album_name: str, artists: list, released: str):
+def create_page(album_name: str, artists: list, released: str, image: str):
     body = {
         "parent": {
             "type": "database_id",
@@ -40,10 +40,39 @@ def create_page(album_name: str, artists: list, released: str):
                 "date": {
                     "start": released
                 }
+            },
+            "Image": {
+                "type": "url",
+                "url": image
             }
         }
     }
 
-    r = requests.post(url, headers=req_headers, data=json.dumps(body))
+    r = requests.post(pages_url, headers=req_headers, data=json.dumps(body))
+    return r.json()['id']
 
-    print(r.text)
+
+# fills page with tracks
+def fill_page(tracks: list, page_id: str):
+    children = []
+    for track in tracks:
+        children.append({
+            "object": "block",
+            "type": "heading_2",
+            "heading_2": {
+                "text": [{"type": "text", "text": {"content": "{}. {}".format(track['number'], track['name'])}}]
+            }
+        })
+        children.append({
+            "object": "block",
+            "type": "bulleted_list_item",
+            "bulleted_list_item": {
+                "text": [{"type": "text", "text": {"content": ""}}]
+            }
+        })
+
+    block_url = "https://api.notion.com/v1/blocks/{}/children".format(
+        page_id)
+
+    r = requests.patch(block_url, headers=req_headers,
+                       data=json.dumps({"children": children}))
