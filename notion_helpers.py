@@ -1,6 +1,7 @@
 import requests
 import json
 import os
+from datetime import datetime
 
 # get the notion env variables defined in a .env file
 from dotenv import load_dotenv
@@ -19,7 +20,7 @@ req_headers = {
 # creates a page in the database with the given arguments
 
 
-def create_page(album_name, artists, released):
+def create_page(album_name: str, artists: list, released: str):
     body = {
         "parent": {
             "type": "database_id",
@@ -29,8 +30,20 @@ def create_page(album_name, artists, released):
             "Album Title": {
                 "type": "title",
                 "title": [{"type": "text", "text": {"content": album_name}}]
+            },
+            "Artist(s)": {
+                "type": "rich_text",
+                "rich_text": [{"type": "text", "text": {"content": ', '.join(artists)}}]
+            },
+            "Released": {
+                "type": "date",
+                "date": {
+                    "start": datetime.strptime(released, '%Y-%m-%d').isoformat()
+                }
             }
         }
     }
 
     r = requests.post(url, headers=req_headers, data=json.dumps(body))
+
+    print(r.text)
